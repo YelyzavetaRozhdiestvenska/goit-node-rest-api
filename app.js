@@ -8,7 +8,7 @@ import contactsRouter from "./routes/contactsRouter.js";
 const app = express();
 
 import { DB_HOST } from "./config.js";
-
+// const { DB_HOST, PORT = 3000 } = process.env;
 mongoose.set("strictQuery", true);
 
 mongoose

@@ -46,9 +46,6 @@ const addContact = async (req, res) => {
 export const createContact = ctrlWrapper(addContact);
 
 const updateById = async (req, res) => {
-  // const size = Object.keys(req.body).length;
-  // if (size === 0) throw HttpError(400, "Body must have at least one field");
-
   const { id } = req.params;
 
   const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
@@ -59,3 +56,15 @@ const updateById = async (req, res) => {
 };
 
 export const updateContact = ctrlWrapper(updateById);
+
+const updateFavoriteStatus = async (req, res) => {
+  const { id } = req.params;
+
+  const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
+
+  if (result === null) throw HttpError(404, "Not found");
+
+  res.status(200).json(result);
+};
+
+export const updateFavorite = ctrlWrapper(updateFavoriteStatus);

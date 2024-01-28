@@ -26,7 +26,7 @@ export const getOneContact = ctrlWrapper(getContactById);
 const removeContact = async (req, res) => {
   const { id } = req.params;
 
-  const contact = await Contact.findByIdAndRemove(id);
+  const contact = await Contact.findByIdAndDelete(id);
 
   if (contact === null) {
     throw HttpError(404, "Not found");
@@ -51,6 +51,11 @@ const updateById = async (req, res) => {
   const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
 
   if (result === null) throw HttpError(404, "Not found");
+
+  const size = Object.keys(req.body).length;
+  if (size === 0) {
+    return { error: "Body must have at least one field" };
+  }
 
   res.status(200).json(result);
 };

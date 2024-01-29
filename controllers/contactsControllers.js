@@ -53,9 +53,7 @@ const updateById = async (req, res) => {
   if (result === null) throw HttpError(404, "Not found");
 
   const size = Object.keys(req.body).length;
-  if (size === 0) {
-    return { error: "Body must have at least one field" };
-  }
+  if (size === 0) throw HttpError(400, "Body must have at least one field");
 
   res.status(200).json(result);
 };

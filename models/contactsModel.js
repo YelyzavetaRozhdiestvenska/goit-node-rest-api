@@ -20,7 +20,7 @@ const contactSchema = new Schema(
     },
     owner: {
       type: Schema.Types.ObjectId,
-      ref: "user",
+      ref: "User",
       required: true,
     },
   },
@@ -29,9 +29,7 @@ const contactSchema = new Schema(
 
 contactSchema.post("save", handleMongooseError);
 
-const Contact = model("Contact", contactSchema);
-
-export { Contact };
+export const Contact = model("Contact", contactSchema);
 
 export const createContactSchema = Joi.object({
   name: Joi.string().min(2).required(),

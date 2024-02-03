@@ -1,15 +1,24 @@
 import HttpError from "../helpers/HttpError.js";
-import { Contact } from "../models/contactsModel.js";
 import { ctrlWrapper } from "../helpers/ctrlWrapper.js";
+import { Contact } from "../models/contactsModel.js";
 
 const listContacts = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 20, favorite } = req.query;
   const skip = (page - 1) * limit;
-  const contacts = await Contact.find({ owner }, "-createdAt -updatedAt", { skip, limit }).populate(
+
+  let query = { owner };
+
+  if (favorite === "true") {
+    query.favorite = true;
+  }
+
+  const contacts = await Contact.find(query, "-createdAt -updatedAt", { skip, limit }).populate(
     "owner",
     "email"
   );
+
+  console.log(contacts);
   res.status(200).json(contacts);
 };
 export const getAllContacts = ctrlWrapper(listContacts);

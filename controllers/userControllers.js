@@ -3,10 +3,10 @@ import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
 import path from "path";
 import { promises as fs } from "fs";
-
 import HttpError from "../helpers/HttpError.js";
 import { User } from "../models/userModel.js";
 import { ctrlWrapper } from "../helpers/ctrlWrapper.js";
+import Jimp from "jimp";
 
 const { SECRET_KEY } = process.env;
 
@@ -104,8 +104,22 @@ const updateUserAvatar = async (req, res) => {
 
   const filename = `${_id}_${originalname}`;
   const resultUpload = path.join(avatarsDir, filename);
-  await fs.rename(tempUpload, resultUpload);
+
+  async function resize() {
+    const image = await Jimp.read(tempUpload);
+    image
+      .resize(250, 250, function (err) {
+        if (err) throw err;
+      })
+      .write(tempUpload);
+
+    await fs.rename(tempUpload, resultUpload);
+  }
+
+  resize();
+
   const avatarURL = path.join("avatars", filename);
+
   await User.findByIdAndUpdate(_id, { avatarURL });
 
   res.json({

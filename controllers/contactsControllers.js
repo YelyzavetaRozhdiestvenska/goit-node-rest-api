@@ -29,8 +29,6 @@ const getContactById = async (req, res) => {
 
   const contact = await Contact.findOne({ _id: id, owner });
 
-  // if (owner !== contact.owner) throw HttpError(404, "Not found");
-
   if (contact === null) {
     throw HttpError(404, "Not found");
   }
@@ -43,16 +41,11 @@ const removeContact = async (req, res) => {
   const { id } = req.params;
   const { _id: owner } = req.user;
 
-  // const requestedContact = await Contact.findById(id);
   const contact = await Contact.findOneAndDelete({ _id: id, owner });
 
   if (contact === null) {
     throw HttpError(404, "Not found");
   }
-  // if (requestedContact === null || owner !== requestedContact.owner)
-  //   throw HttpError(404, "Not found");
-
-  // const contact = await Contact.findByIdAndDelete(id);
 
   res.status(200).json(contact);
 };
@@ -70,19 +63,14 @@ const updateById = async (req, res) => {
   const { id } = req.params;
   const { _id: owner } = req.user;
 
-  // const requestedContact = await Contact.findById(id);
   const result = await Contact.findOneAndUpdate({ _id: id, owner }, req.body, { new: true });
 
   if (result === null) {
     throw HttpError(404, "Not found");
   }
-  // if (requestedContact === null || owner !== requestedContact.owner)
-  //   throw HttpError(404, "Not found");
 
   const size = Object.keys(req.body).length;
   if (size === 0) throw HttpError(400, "Body must have at least one field");
-
-  // const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
 
   res.status(200).json(result);
 };
@@ -95,13 +83,6 @@ const updateFavoriteStatus = async (req, res) => {
   const result = await Contact.findOneAndUpdate({ _id: id, owner }, req.body, { new: true });
 
   if (result === null) throw HttpError(404, "Not found");
-
-  // const requestedContact = await Contact.findById(id);
-
-  // if (requestedContact === null || owner !== requestedContact.owner)
-  //   throw HttpError(404, "Not found");
-
-  // const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
 
   res.status(200).json(result);
 };

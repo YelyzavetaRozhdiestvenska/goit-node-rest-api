@@ -44,6 +44,7 @@ const removeContact = async (req, res) => {
   const { _id: owner } = req.user;
 
   const requestedContact = await Contact.findById(id);
+  // const contact = await Contact.findByIdAndDelete({ _id: id, owner });
 
   if (requestedContact === null || owner !== requestedContact.owner)
     throw HttpError(404, "Not found");

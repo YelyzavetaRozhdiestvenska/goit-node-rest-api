@@ -5,10 +5,12 @@ import {
   logout,
   getCurrent,
   subscriprion,
+  updateAvatar,
 } from "../controllers/userControllers.js";
 import validateBody from "../helpers/validateBody.js";
 import { registerSchema, loginSchema, subscriprionSchema } from "../models/userModel.js";
 import { authenticate } from "../helpers/authenticate.js";
+import { upload } from "../helpers/upload.js";
 
 const userRouter = Router();
 
@@ -22,6 +24,8 @@ userRouter.post("/logout", authenticate, logout);
 
 userRouter.get("/current", authenticate, getCurrent);
 
-// userRouter.patch("/", authenticate, validateBody(subscriprionSchema), subscription);
+userRouter.patch("/", authenticate, validateBody(subscriprionSchema), subscriprion);
+
+userRouter.patch("/avatars", authenticate, upload.single("avatar"), updateAvatar);
 
 export default userRouter;

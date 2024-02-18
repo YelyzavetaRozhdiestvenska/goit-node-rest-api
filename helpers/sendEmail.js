@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 import "dotenv/config";
 
-const { META_PASSWORD, META_FROM } = process.env;
+const { META_PASSWORD, META_FROM, BASE_URL } = process.env;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const nodemailerConfig = {
+const config = {
   host: "smtp.meta.ua",
-  port: 465, // 25, 465, 2525
+  port: 465,
   secure: true,
   auth: {
     user: META_FROM,
@@ -13,11 +14,20 @@ const nodemailerConfig = {
   },
 };
 
-const tranport = nodemailer.createTransport(nodemailerConfig);
+const transporter = nodemailer.createTransport(config);
 
-const sendEmail = (data) => {
-  const email = { ...data, from: META_FROM };
-  return tranport.sendMail(email);
+export const sendVerifyEmail = async (emailTo, verificationToken) => {
+  const emailOptions = {
+    from: META_FROM,
+    to: emailTo,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click to verify email</a>`,
+  };
+  try {
+    const email = await transporter.sendMail(emailOptions);
+
+    return email;
+  } catch (error) {
+    console.log(error);
+  }
 };
-
-export default sendEmail;

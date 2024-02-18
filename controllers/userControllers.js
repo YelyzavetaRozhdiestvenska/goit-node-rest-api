@@ -8,19 +8,19 @@ import { User } from "../models/userModel.js";
 import { ctrlWrapper } from "../helpers/ctrlWrapper.js";
 import Jimp from "jimp";
 import { nanoid } from "nanoid";
-import sendEmail from "../helpers/sendEmail.js";
+import { sendVerifyEmail } from "../helpers/sendEmail.js";
 
 const { SECRET_KEY, BASE_URL } = process.env;
 
 const avatarsDir = path.resolve("public/avatars");
 
+// Registration
+
 const registerUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
-  if (user) {
-    throw HttpError(409, "Email in use");
-  }
+  if (user) throw HttpError(409, "Email in use");
 
   const hashPassword = await bcrypt.hash(password, 10);
   const verificationToken = nanoid();
@@ -34,13 +34,7 @@ const registerUser = async (req, res) => {
     verificationToken,
   });
 
-  const verifyEmail = {
-    to: email,
-    subject: "Verify email",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click to verify email</a>`,
-  };
-
-  await sendEmail(verifyEmail);
+  await sendVerifyEmail(email, verificationToken);
 
   res.status(201).json({
     user: { email: newUser.email, subscription: newUser.subscription },
@@ -49,14 +43,15 @@ const registerUser = async (req, res) => {
 
 export const register = ctrlWrapper(registerUser);
 
+// Verify email
+
 const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
   const user = await User.findOne({ verificationToken });
-  if (!user) {
-    throw HttpError(404, "User not found");
-  }
 
-  await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" });
+  if (!user) throw HttpError(404, "User not found");
+
+  await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: null });
 
   res.json({
     message: "Verification successful",
@@ -64,11 +59,13 @@ const verifyEmail = async (req, res) => {
 };
 export const verify = ctrlWrapper(verifyEmail);
 
+// Resend Email with Verification Token
+
 const resendVerifyEmailUser = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    throw HttpError(400, "User not found");
+    throw HttpError(401, "User not found");
   }
   if (user.verify) {
     throw HttpError(400, "Verification has already been passed");
@@ -87,6 +84,8 @@ const resendVerifyEmailUser = async (req, res) => {
   });
 };
 export const resendVerifyEmail = ctrlWrapper(resendVerifyEmailUser);
+
+// Login
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -117,6 +116,8 @@ const loginUser = async (req, res) => {
 
 export const login = ctrlWrapper(loginUser);
 
+// logout
+
 const logoutUser = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: null });
@@ -136,6 +137,8 @@ const getCurrentUser = async (req, res) => {
 };
 export const getCurrent = ctrlWrapper(getCurrentUser);
 
+// update user's Subscription
+
 const updateSubscription = async (req, res, next) => {
   const { _id: user } = req.user;
 
@@ -153,6 +156,8 @@ const updateSubscription = async (req, res, next) => {
   });
 };
 export const subscriprion = ctrlWrapper(updateSubscription);
+
+// update user's Avatar
 
 const updateUserAvatar = async (req, res) => {
   const { _id } = req.user;
